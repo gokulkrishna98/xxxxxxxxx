@@ -5,6 +5,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,11 +17,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     int timer;
     SensorManager mSensorManager;
     Sensor mSensor;
+    MediaPlayer mediaPlayer;
+    int flag=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         textView= (TextView) findViewById(R.id.textvalue);
+        mediaPlayer= MediaPlayer.create(this,R.raw.alarmsound);
+
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         if (mSensor == null){
@@ -43,15 +49,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.alarmsound);
-        if(event.values[0]<5.0)
-        {
+        float[] values=event.values;
+        int compatevalue=Double.compare(values[0],5.0);
+        if(compatevalue>0) {
+            if(flag>0)
+               mediaPlayer.pause();
+            textView.setText("far");
+        }
+        else {
+            flag++;
             mediaPlayer.start();
             textView.setText("near");
-        }
-        if(event.values[0]>5.0)
-        {   textView.setText("far");
-
         }
 
     }
@@ -60,4 +68,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
+
+
+
 }
